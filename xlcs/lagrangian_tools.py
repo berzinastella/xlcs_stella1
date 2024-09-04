@@ -184,7 +184,7 @@ def eigenspectrum(
     return lmin, lmax, vmin, vmax, ftle
 
 
-def lavd(ds, mean_vorticity, dt, origin_id, shape_p):
+def lavd(ds, mean_vorticity, adv_dt, adv_time, origin_id, shape_p):
     """
     Calculate the Lagrangian averaged vorticity deviation (LAVD) from the trajectories output
     Args:
@@ -201,10 +201,29 @@ def lavd(ds, mean_vorticity, dt, origin_id, shape_p):
     # in large domain the vorticity is ~zero so it shouldn't affect much
 
     # integration along the trajectory
-    vorticity_deviation = np.trapz(
-        np.abs(np.nan_to_num(ds.vorticity) - mean_vorticity), dx=dt
-    )
+    # vorticity_deviation = np.trapz(
+    #     np.abs(np.nan_to_num(ds.vorticity) - mean_vorticity), dx=dt
+    # )
+
+    # # do it with a mean??
+    # vorticity_deviation = np.nanmean(np.abs(np.nan_to_num(ds.vorticity) - mean_vorticity))
+    # # this writes one value in all values
+
+
+    #### this is form parcels functions from lexie
+    # def calc_LAVD(vort,output_freq,runtime):
+    #     vort_avg_t = np.nanmean(vort,axis=0)[1:] #Find average vorticity over the entire spatial domain at each time step
+    #     LAVD = np.trapz(np.absolute(vort[:,1:] - vort_avg_t), dx=output_freq*60*60, axis=1)/(runtime*24*60*60-output_freq*60*60) #trapz does the integration; convert data to be in seconds units
+    # return LAVD
+
+    vorticity_deviation = np.trapz(np.absolute(np.nan_to_num(ds.vorticity) - mean_vorticity), dx=adv_dt*60*60, axis=1) / (adv_time*24*60*60)
+    
+    # vorticity_deviation = np.trapz(np.absolute(np.nan_to_num(ds.vorticity) - mean_vorticity), dx=adv_dt*60*60, axis=-1)/(adv_time*24*60*60-adv_dt*60*60)
+    
     value = np.zeros(shape_p)
     pid = (ds.trajectory.values - origin_id).astype("int")
     value[np.unravel_index(pid, shape_p)] = vorticity_deviation
     return value
+
+
+## Is this the mean
