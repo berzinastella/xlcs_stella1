@@ -66,10 +66,18 @@ def extract_contours(
         peaks_xy: centers of extracted vortices [N, 2]
         contours: contours of extracted vortices [N, 2]
     """
+## original 
+    # # peaks and data structures 
+    # peaks_xy = peak_local_max(ds["lavd"].values, min_distance=20)  # indices
+    # peaks_xy = peak_local_max(ds["lavd"].values, min_distance=20)  # indices
+    # peaks_value = ds["lavd"].values[peaks_xy[:, 0], peaks_xy[:, 1]]
+    # contours = np.empty_like(peaks_value, dtype="object")
 
-    # peaks and data structures
-    peaks_xy = peak_local_max(ds["lavd"].values, min_distance=20)  # indices
-    peaks_value = ds["lavd"].values[peaks_xy[:, 0], peaks_xy[:, 1]]
+    ## changed to work with lexi jones code
+    peaks_xy = peak_local_max(ds.data, min_distance=20)  # indices
+    peaks_xy = peak_local_max(ds.data, min_distance=20)  # indices
+
+    peaks_value = ds.data[peaks_xy[:, 0], peaks_xy[:, 1]]
     contours = np.empty_like(peaks_value, dtype="object")
 
     dx, dy = np.mean(np.diff(ds["xc"].values)), np.mean(np.diff(ds["yc"].values))
